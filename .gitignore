@@ -1,5 +1,9 @@
 # Default binary file.
 apk_analysis_cloud_platform_server
+apk_analysis_cloud_platform_server.exe
 
 # Mac OS file.
 .DS_Store
+
+# Delete configuration file.
+/config/config.yaml
