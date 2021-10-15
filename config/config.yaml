@@ -1,0 +1,10 @@
+mode: debug
+port: :11000
+url: http://0.0.0.0:11000
+max_check_count: 10
+database: 
+  host: 47.104.153.34:3306
+  name: cloud_server
+  username: root
+  password: serverRoot
+  charset: utf8mb4
