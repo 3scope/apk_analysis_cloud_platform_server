@@ -62,6 +62,7 @@ func (ur *UserRepository) Add(user model.User) (*model.User, error) {
 }
 
 func (ur *UserRepository) Get(user model.User) *model.User {
+	// It can be one or multiple.
 	if err := ur.DB.Where(&user).Find(&user).Error; err != nil {
 		log.Println(err)
 		return nil
