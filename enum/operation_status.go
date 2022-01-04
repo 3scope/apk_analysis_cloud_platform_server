@@ -13,14 +13,14 @@ const (
 func (o OperationStatus) String() string {
 	switch o {
 	case InvalidOperation:
-		return "Invalid Operation."
+		return "invalid operation"
 	case SuccessfulOpration:
-		return "Successful operation."
+		return "successful operation"
 	case FailedOpration:
-		return "operation failed."
+		return "operation failed"
 	case UnauthorizedOpration:
-		return "Illegal operation."
+		return "illegal operation"
 	default:
-		return "Illegal Status."
+		return "illegal status"
 	}
 }

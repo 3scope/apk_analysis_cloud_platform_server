@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"log"
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/model"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/util"
@@ -13,85 +12,109 @@ type ReportRepository struct {
 	DB *gorm.DB
 }
 
-// The parameter passed in can be any attribute value of the report object.
+// The parameter passed in can be any attribute value of the entity.
 type ReportRepositoryInterface interface {
-	GetTotal(request *Query) (total int64)
-	List(request *Query) (reports []model.ReportStorage)
-	Add(report model.ReportStorage) (*model.ReportStorage, error)
-	Get(report model.ReportStorage) *model.ReportStorage
-	IsExist(report model.ReportStorage) *model.ReportStorage
-	Delete(report model.ReportStorage) bool
-	Update(report model.ReportStorage) (*model.ReportStorage, error)
+	GetTotal(request *Request) (int64, error)
+	List(request *Request) ([]model.Report, error)
+	Add(request *Request) (*model.Report, error)
+	GetOne(request *Request) (*model.Report, error)
+	IsExist(request *Request) (int64, error)
+	Delete(request *Request) (bool, error)
+	Update(request *Request) (*model.Report, error)
 }
 
-func (rr *ReportRepository) GetTotal(request *Query) (total int64) {
-	db := rr.DB
-	var reports []model.ReportStorage
-	if request.Where != "" {
-		db = db.Where(request.Where)
+func (repo *ReportRepository) GetTotal(request *Request) (int64, error) {
+	// The default database.
+	var total int64
+	db := repo.DB
+	var reports []model.Report
+	// The Where object is a struct pointer.
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
 	if err := db.Find(&reports).Count(&total).Error; err != nil {
-		log.Println(err)
-		return 0
+		return 0, err
 	}
-	return total
+	return total, nil
 }
 
-func (rr *ReportRepository) List(request *Query) (reports []model.ReportStorage) {
-	db := rr.DB
+func (repo *ReportRepository) List(request *Request) ([]model.Report, error) {
+	reports := make([]model.Report, 0)
+	db := repo.DB
 	// First to get the total number of data.
-	total := rr.GetTotal(request)
+	total, err := repo.GetTotal(request)
+	if err != nil {
+		return nil, err
+	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Where != "" {
-		db = db.Where(request.Where)
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
+
 	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&reports).Error; err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
-	return reports
+	return reports, nil
 }
 
-func (rr *ReportRepository) Add(report model.ReportStorage) (*model.ReportStorage, error) {
-	if err := rr.DB.Create(&report).Error; err != nil {
-		return nil, errors.New("report registration failed")
+func (repo *ReportRepository) Add(request *Request) (*model.Report, error) {
+	var report model.Report
+	// To judge whether the request entity is existed.
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("report already exists")
+	}
+
+	// Use scan to store the result.
+	if err := repo.DB.Create(request.Entity).Scan(&report).Error; err != nil {
+		return nil, err
 	}
 	return &report, nil
 }
 
-func (rr *ReportRepository) Get(report model.ReportStorage) *model.ReportStorage {
-	if err := rr.DB.Where(&report).Find(&report).Error; err != nil {
-		log.Println(err)
-		return nil
+func (repo *ReportRepository) GetOne(request *Request) (*model.Report, error) {
+	// Get only one instance.
+	var report model.Report
+	db := repo.DB
+
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
-	return &report
+
+	if err := db.Limit(1).Find(&report).Error; err != nil {
+		return nil, err
+	}
+	return &report, nil
 }
 
-func (rr *ReportRepository) IsExist(report model.ReportStorage) *model.ReportStorage {
-	if err := rr.DB.Where(&report).Find(&report); err != nil {
-		log.Println(err)
-		return nil
+func (repo *ReportRepository) IsExist(request *Request) (int64, error) {
+	var count int64
+	// The "Entity" is pointer.
+	if err := repo.DB.Where(request.Entity).Find(&model.Report{}).Count(&count).Error; err != nil {
+		return count, err
 	}
-	return &report
+	return count, nil
 }
 
-func (rr *ReportRepository) Delete(report model.ReportStorage) bool {
-	if err := rr.DB.Delete(&report); err != nil {
-		log.Println(err)
-		return false
+func (repo *ReportRepository) Delete(request *Request) (bool, error) {
+	if err := repo.DB.Model(&model.Report{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+		return false, err
 	}
-	return true
+	return true, nil
 }
 
-// This method can not change the password.
-func (rr *ReportRepository) Update(report model.ReportStorage) (*model.ReportStorage, error) {
-	if err := rr.DB.Model(&report).Updates(model.ReportStorage{
+func (repo *ReportRepository) Update(request *Request) (*model.Report, error) {
+	var report model.Report
+	// The verification task is handed over to the front end.
+	// Use scan to store the result.
+	if err := repo.DB.Model(&model.Report{}).Where(request.Entity).Updates(model.Report{
 		ReportName: report.ReportName,
-		UploadedBy: report.UploadedBy,
-		AppName:    report.AppName,
-	}).Error; err != nil {
-		return nil, errors.New("report update failed")
+		CaseID:     report.CaseID,
+	}).Scan(&report).Error; err != nil {
+		return nil, err
 	}
+
 	return &report, nil
 }

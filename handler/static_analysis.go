@@ -13,12 +13,12 @@ import (
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
 )
 
-type VideoHandler struct {
-	Srv *service.VideoService
+type StaticAnalysisHandler struct {
+	Srv *service.StaticAnalysisService
 }
 
 //
-type VideoHandlerInterface interface {
+type StaticAnalysisHandlerInterface interface {
 	GetTotalHandler(c *gin.Context)
 	ListHandler(c *gin.Context)
 	AddHandler(c *gin.Context)
@@ -28,8 +28,8 @@ type VideoHandlerInterface interface {
 	UpdateHandler(c *gin.Context)
 }
 
-func (h *VideoHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) GetTotalHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -52,8 +52,8 @@ func (h *VideoHandler) GetTotalHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) ListHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) ListHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -76,8 +76,8 @@ func (h *VideoHandler) ListHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) AddHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) AddHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -99,8 +99,8 @@ func (h *VideoHandler) AddHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) GetOneHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -122,8 +122,8 @@ func (h *VideoHandler) GetOneHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) IsExistHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -146,8 +146,8 @@ func (h *VideoHandler) IsExistHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) DeleteHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -170,8 +170,8 @@ func (h *VideoHandler) DeleteHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *StaticAnalysisHandler) UpdateHandler(c *gin.Context) {
+	var entity repository.StaticAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))

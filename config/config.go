@@ -9,12 +9,13 @@ import (
 
 type Config struct {
 	Name string
+	Type string
 	Path string
 }
 
 func (c *Config) initConfig() error {
 	viper.SetConfigName(c.Name)
-	viper.SetConfigType("yaml")
+	viper.SetConfigType(c.Type)
 	viper.AddConfigPath(c.Path)
 	if err := viper.ReadInConfig(); err != nil {
 		return err
@@ -33,7 +34,8 @@ func (c *Config) watchConfig() {
 func init() {
 	c := Config{
 		Name: "config",
-		Path: "config",
+		Type: "yaml",
+		Path: "./config",
 	}
 	if err := c.initConfig(); err != nil {
 		log.Panicln(err)

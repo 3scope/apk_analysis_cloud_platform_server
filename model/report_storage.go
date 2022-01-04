@@ -2,11 +2,10 @@ package model
 
 import "gorm.io/gorm"
 
-type ReportStorage struct {
+type Report struct {
 	gorm.Model
-	ReportName string `json:"reportName" gorm:"report_name"`
-	UploadedBy string `json:"uploadedBy" gorm:"column:uploaded_by"`
-	AppName    string `json:"appName" gorm:"column:app_name"`
-	// To store the path where the report is.
-	ReportPath string `json:"-" gorm:"column:report_path"`
+	ReportName string `json:"reportName" gorm:"report_name" form:"reportName"`
+
+	// The logical foreign key
+	CaseID uint `json:"caseID" gorm:"case_id" form:"caseID"`
 }

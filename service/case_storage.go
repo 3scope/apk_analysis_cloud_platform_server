@@ -7,43 +7,43 @@ import (
 	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 )
 
-type VideoService struct {
-	Repository *repository.VideoRepository
+type CaseService struct {
+	Repository *repository.CaseRepository
 }
 
-type VideoServiceInterface interface {
+type CaseServiceInterface interface {
 	GetTotal(request *repository.Request) (uint, error)
-	List(request *repository.Request) ([]model.Video, error)
-	Add(request *repository.Request) (*model.Video, error)
-	GetOne(request *repository.Request) (*model.Video, error)
+	List(request *repository.Request) ([]model.Case, error)
+	Add(request *repository.Request) (*model.Case, error)
+	GetOne(request *repository.Request) (*model.Case, error)
 	// Someting difference.
 	IsExist(request *repository.Request) (bool, error)
 	Delete(request *repository.Request) (bool, error)
-	Update(request *repository.Request) (*model.Video, error)
+	Update(request *repository.Request) (*model.Case, error)
 }
 
-func (srv *VideoService) GetTotal(request *repository.Request) (uint, error) {
+func (srv *CaseService) GetTotal(request *repository.Request) (uint, error) {
 	total, err := srv.Repository.GetTotal(request)
 
 	return uint(total), err
 }
 
 // To Get Number of instances.
-func (srv *VideoService) List(request *repository.Request) ([]model.Video, error) {
+func (srv *CaseService) List(request *repository.Request) ([]model.Case, error) {
 	return srv.Repository.List(request)
 }
 
 // Hand the verification to the front end.
-func (srv *VideoService) Add(request *repository.Request) (*model.Video, error) {
+func (srv *CaseService) Add(request *repository.Request) (*model.Case, error) {
 	return srv.Repository.Add(request)
 }
 
-func (srv *VideoService) GetOne(request *repository.Request) (*model.Video, error) {
+func (srv *CaseService) GetOne(request *repository.Request) (*model.Case, error) {
 	return srv.Repository.GetOne(request)
 }
 
 // To add a middleware.
-func (srv *VideoService) IsExist(request *repository.Request) (bool, error) {
+func (srv *CaseService) IsExist(request *repository.Request) (bool, error) {
 	count, err := srv.Repository.IsExist(request)
 	if err != nil {
 		return false, err
@@ -54,19 +54,19 @@ func (srv *VideoService) IsExist(request *repository.Request) (bool, error) {
 	}
 }
 
-func (srv *VideoService) Delete(request *repository.Request) (bool, error) {
+func (srv *CaseService) Delete(request *repository.Request) (bool, error) {
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if video, ok := request.Entity.(model.Video); !ok {
+	if caseInstance, ok := request.Entity.(model.Case); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if video.ID == 0 {
+	} else if caseInstance.ID == 0 {
 		return false, errors.New("request parameter error, the primary key is null")
 	}
 	return srv.Repository.Delete(request)
 }
 
-func (srv *VideoService) Update(request *repository.Request) (*model.Video, error) {
+func (srv *CaseService) Update(request *repository.Request) (*model.Case, error) {
 	result, err := srv.Repository.Update(request)
 	if err != nil {
 		return nil, err

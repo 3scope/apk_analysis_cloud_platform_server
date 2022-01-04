@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"log"
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/model"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/util"
@@ -13,87 +12,113 @@ type UserRepository struct {
 	DB *gorm.DB
 }
 
-// The parameter passed in can be any attribute value of the user object.
+// The parameter passed in can be any attribute value of the entity.
 type UserRepositoryInterface interface {
-	GetTotal(request *Query) (total int64)
-	List(request *Query) (users []model.User)
-	Add(user model.User) (*model.User, error)
-	Get(user model.User) *model.User
-	IsExist(user model.User) *model.User
-	Delete(user model.User) bool
-	Update(user model.User) (*model.User, error)
+	GetTotal(request *Request) (int64, error)
+	List(request *Request) ([]model.User, error)
+	Add(request *Request) (*model.User, error)
+	GetOne(request *Request) (*model.User, error)
+	IsExist(request *Request) (int64, error)
+	Delete(request *Request) (bool, error)
+	Update(request *Request) (*model.User, error)
 }
 
-func (ur *UserRepository) GetTotal(request *Query) (total int64) {
-	db := ur.DB
+func (repo *UserRepository) GetTotal(request *Request) (int64, error) {
+	// The default database.
+	var total int64
+	db := repo.DB
 	var users []model.User
-	//TODO: Verify whether where needs to be processed.
-	if request.Where != "" {
-		db = db.Where(request.Where)
+	// The Where object is a struct pointer.
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
 	if err := db.Find(&users).Count(&total).Error; err != nil {
-		log.Println(err)
-		return 0
+		return 0, err
 	}
-	return total
+	return total, nil
 }
 
-func (ur *UserRepository) List(request *Query) (users []model.User) {
-	db := ur.DB
+func (repo *UserRepository) List(request *Request) ([]model.User, error) {
+	users := make([]model.User, 0)
+	db := repo.DB
 	// First to get the total number of data.
-	total := ur.GetTotal(request)
+	total, err := repo.GetTotal(request)
+	if err != nil {
+		return nil, err
+	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Where != "" {
-		db = db.Where(request.Where)
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
+
 	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
-	return users
+	return users, nil
 }
 
-func (ur *UserRepository) Add(user model.User) (*model.User, error) {
-	if err := ur.DB.Create(&user).Error; err != nil {
-		return nil, errors.New("user registration failed")
+func (repo *UserRepository) Add(request *Request) (*model.User, error) {
+	var user model.User
+	// To judge whether the request entity is existed.
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("user already exists")
+	}
+
+	// Use scan to store the result.
+	if err := repo.DB.Create(request.Entity).Scan(&user).Error; err != nil {
+		return nil, err
 	}
 	return &user, nil
 }
 
-func (ur *UserRepository) Get(user model.User) *model.User {
-	// It can be one or multiple.
-	if err := ur.DB.Where(&user).Find(&user).Error; err != nil {
-		log.Println(err)
-		return nil
+func (repo *UserRepository) GetOne(request *Request) (*model.User, error) {
+	// Get only one instance.
+	var user model.User
+	db := repo.DB
+
+	if request.Entity != nil {
+		db = db.Where(request.Entity)
 	}
-	return &user
+
+	if err := db.Limit(1).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-func (ur *UserRepository) IsExist(user model.User) *model.User {
-	if err := ur.DB.Where(&user).Find(&user); err != nil {
-		log.Println(err)
-		return nil
+func (repo *UserRepository) IsExist(request *Request) (int64, error) {
+	var count int64
+	// The "Entity" is pointer.
+	if err := repo.DB.Where(request.Entity).Find(&model.User{}).Count(&count).Error; err != nil {
+		return count, err
 	}
-	return &user
+	return count, nil
 }
 
-func (ur *UserRepository) Delete(user model.User) bool {
-	if err := ur.DB.Delete(&user); err != nil {
-		log.Println(err)
-		return false
+func (repo *UserRepository) Delete(request *Request) (bool, error) {
+	if err := repo.DB.Model(&model.User{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+		return false, err
 	}
-	return true
+	return true, nil
 }
 
-// This method can not change the password.
-func (ur *UserRepository) Update(user model.User) (*model.User, error) {
-	if err := ur.DB.Model(&user).Updates(model.User{Username: user.Username,
+func (repo *UserRepository) Update(request *Request) (*model.User, error) {
+	var user model.User
+	// The verification task is handed over to the front end.
+	// Use scan to store the result.
+	if err := repo.DB.Model(&model.User{}).Where(request.Entity).Updates(model.User{
+		Username:    user.Username,
 		RealName:    user.RealName,
 		Email:       user.Email,
-		PhoneNumber: user.PhoneNumber,
-		Description: user.Description}).Error; err != nil {
-		return nil, errors.New("user update failed")
+		Role:        user.Role,
+		Description: user.Description,
+		Password:    user.Password,
+	}).Scan(&user).Error; err != nil {
+		return nil, err
 	}
+
 	return &user, nil
 }

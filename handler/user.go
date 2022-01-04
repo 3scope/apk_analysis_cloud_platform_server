@@ -1,15 +1,15 @@
 package handler
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/enum"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/model"
 	_ "github.com/sanscope/apk_analysis_cloud_platform_server/modify_log"
+	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
 )
 
@@ -17,173 +17,179 @@ type UserHandler struct {
 	Srv *service.UserService
 }
 
+//
+type UserHandlerInterface interface {
+	GetTotalHandler(c *gin.Context)
+	ListHandler(c *gin.Context)
+	AddHandler(c *gin.Context)
+	GetOneHandler(c *gin.Context)
+	IsExistHandler(c *gin.Context)
+	DeleteHandler(c *gin.Context)
+	UpdateHandler(c *gin.Context)
+}
+
 func (h *UserHandler) GetTotalHandler(c *gin.Context) {
-	var request repository.Query
-	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
-	value := h.Srv.GetTotal(&request)
-	// Same structure as Response struct.
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": enum.SuccessfulOpration.String(),
-		"data":    value,
-	})
+
+	if result, err := h.Srv.GetTotal(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		// If successful, pass in the result value.
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
+		return
+	}
 }
 
 func (h *UserHandler) ListHandler(c *gin.Context) {
-	var request repository.Query
-	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
-	value := h.Srv.List(&request)
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": enum.SuccessfulOpration.String(),
-		"data":    value,
-	})
+
+	if result, err := h.Srv.List(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		// If successful, pass in the result value.
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
+		return
+	}
 }
 
 func (h *UserHandler) AddHandler(c *gin.Context) {
-	var u model.User
-	// Client request error.
-	if err := c.ShouldBind(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
-	// Server internal error.
-	ok, message := h.Srv.Add(u)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    enum.FailedOpration,
-			"message": message,
-			"data":    nil,
-		})
-		log.Panicln(message)
+
+	if result, err := h.Srv.Add(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": message,
-		"data":    nil,
-	})
 }
 
-func (h *UserHandler) GetHandler(c *gin.Context) {
-	u := model.User{}
-	// Client request error.
-	// Http method has nothing to do with the parameters required by the function.
-	if err := c.ShouldBindQuery(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+func (h *UserHandler) GetOneHandler(c *gin.Context) {
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
-	value := h.Srv.Get(u)
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": enum.SuccessfulOpration.String(),
-		"data":    value,
-	})
+
+	if result, err := h.Srv.GetOne(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
+		return
+	}
 }
 
 func (h *UserHandler) IsExistHandler(c *gin.Context) {
-	u := model.User{}
-	// Client request error.
-	if err := c.ShouldBind(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
+
 	// Return boolean value.
-	value := h.Srv.IsExist(u)
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": enum.SuccessfulOpration.String(),
-		"data":    value,
-	})
+	if result, err := h.Srv.IsExist(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
+		return
+	}
 }
 
 func (h *UserHandler) DeleteHandler(c *gin.Context) {
-	u := model.User{}
-	// Client request error.
-	if err := c.ShouldBind(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
+
 	// Server internal error.
-	ok, message := h.Srv.Delete(u)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    enum.FailedOpration,
-			"message": message,
-			"data":    nil,
-		})
-		log.Panicln(message)
+	if result, err := h.Srv.Delete(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": message,
-		"data":    nil,
-	})
 }
 
 func (h *UserHandler) UpdateHandler(c *gin.Context) {
-	u := model.User{}
-	// Client request error.
-	if err := c.ShouldBind(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    enum.FailedOpration,
-			"message": enum.FailedOpration.String(),
-			"data":    nil,
-		})
-		log.Panicln(err)
+	var entity repository.UserEntity
+	request := RequestFactory(c, entity)
+	if request == nil {
+		log.Println(errors.New("request is empty"))
 		return
 	}
+
 	// Server internal error.
-	ok, message := h.Srv.Update(u)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    enum.FailedOpration,
-			"message": message,
-			"data":    nil,
-		})
-		log.Panicln(message)
+	if result, err := h.Srv.Update(request); err != nil {
+		res := ResponseFactory(enum.FailedOpration, nil)
+		c.JSON(http.StatusInternalServerError, res)
+
+		log.Println(err)
+		return
+	} else {
+		res := ResponseFactory(enum.SuccessfulOpration, result)
+		c.JSON(http.StatusOK, res)
+
+		log.Println(res)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    enum.SuccessfulOpration,
-		"message": message,
-		"data":    nil,
-	})
 }

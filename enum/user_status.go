@@ -13,14 +13,14 @@ const (
 func (u UserStatus) String() string {
 	switch u {
 	case OfflineStatus:
-		return "User is offline."
+		return "user is offline"
 	case OnlineStatus:
-		return "User is oneline."
+		return "user is oneline"
 	case BusyStatus:
-		return "User is busy."
+		return "user is busy"
 	case LeaveTemporarily:
-		return "User temporarily left."
+		return "user temporarily left"
 	default:
-		return "Illegal status."
+		return "illegal status"
 	}
 }

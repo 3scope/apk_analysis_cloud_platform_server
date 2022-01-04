@@ -13,12 +13,12 @@ import (
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
 )
 
-type VideoHandler struct {
-	Srv *service.VideoService
+type DynamicAnalysisHandler struct {
+	Srv *service.DynamicAnalysisService
 }
 
 //
-type VideoHandlerInterface interface {
+type DynamicAnalysisHandlerInterface interface {
 	GetTotalHandler(c *gin.Context)
 	ListHandler(c *gin.Context)
 	AddHandler(c *gin.Context)
@@ -28,8 +28,8 @@ type VideoHandlerInterface interface {
 	UpdateHandler(c *gin.Context)
 }
 
-func (h *VideoHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) GetTotalHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -52,8 +52,8 @@ func (h *VideoHandler) GetTotalHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) ListHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) ListHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -76,8 +76,8 @@ func (h *VideoHandler) ListHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) AddHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) AddHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -99,8 +99,8 @@ func (h *VideoHandler) AddHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) GetOneHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -122,8 +122,8 @@ func (h *VideoHandler) GetOneHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) IsExistHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -146,8 +146,8 @@ func (h *VideoHandler) IsExistHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) DeleteHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
@@ -170,8 +170,8 @@ func (h *VideoHandler) DeleteHandler(c *gin.Context) {
 	}
 }
 
-func (h *VideoHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.VideoEntity
+func (h *DynamicAnalysisHandler) UpdateHandler(c *gin.Context) {
+	var entity repository.DynamicAnalysisEntity
 	request := RequestFactory(c, entity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
