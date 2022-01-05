@@ -7,7 +7,6 @@ import (
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/enum"
 	_ "github.com/sanscope/apk_analysis_cloud_platform_server/modify_log"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
@@ -29,8 +28,7 @@ type ReportHandlerInterface interface {
 }
 
 func (h *ReportHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -53,8 +51,7 @@ func (h *ReportHandler) GetTotalHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) ListHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -77,8 +74,7 @@ func (h *ReportHandler) ListHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) AddHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -100,8 +96,7 @@ func (h *ReportHandler) AddHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -123,8 +118,7 @@ func (h *ReportHandler) GetOneHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -147,8 +141,7 @@ func (h *ReportHandler) IsExistHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -171,8 +164,7 @@ func (h *ReportHandler) DeleteHandler(c *gin.Context) {
 }
 
 func (h *ReportHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.ReportEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.ReportEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return

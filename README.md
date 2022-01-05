@@ -7,6 +7,6 @@
 ### Environment
 
 - Go Version: 1.17
-- Gin Version: 1.7.4
-- Gorm Version: 1.21.16
-- Viper Version: 1.9.0
+- Gin Version: 1.7.7
+- Gorm Version: 1.22.4
+- Viper Version: 1.10.1

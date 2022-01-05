@@ -7,7 +7,6 @@ import (
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/enum"
 	_ "github.com/sanscope/apk_analysis_cloud_platform_server/modify_log"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
@@ -29,8 +28,7 @@ type UserHandlerInterface interface {
 }
 
 func (h *UserHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -53,8 +51,7 @@ func (h *UserHandler) GetTotalHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) ListHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -77,8 +74,7 @@ func (h *UserHandler) ListHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) AddHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -100,8 +96,7 @@ func (h *UserHandler) AddHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -123,8 +118,7 @@ func (h *UserHandler) GetOneHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -147,8 +141,7 @@ func (h *UserHandler) IsExistHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -171,8 +164,7 @@ func (h *UserHandler) DeleteHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.UserEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.UserEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return

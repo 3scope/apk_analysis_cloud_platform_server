@@ -7,7 +7,6 @@ import (
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/enum"
 	_ "github.com/sanscope/apk_analysis_cloud_platform_server/modify_log"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
@@ -29,8 +28,7 @@ type DynamicAnalysisHandlerInterface interface {
 }
 
 func (h *DynamicAnalysisHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -53,8 +51,7 @@ func (h *DynamicAnalysisHandler) GetTotalHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) ListHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -77,8 +74,7 @@ func (h *DynamicAnalysisHandler) ListHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) AddHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -100,8 +96,7 @@ func (h *DynamicAnalysisHandler) AddHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -123,8 +118,7 @@ func (h *DynamicAnalysisHandler) GetOneHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -147,8 +141,7 @@ func (h *DynamicAnalysisHandler) IsExistHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -171,8 +164,7 @@ func (h *DynamicAnalysisHandler) DeleteHandler(c *gin.Context) {
 }
 
 func (h *DynamicAnalysisHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.DynamicAnalysisEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.DynamicAnalysisEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return

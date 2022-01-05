@@ -11,5 +11,5 @@ type User struct {
 	Description string `json:"description" gorm:"column:description" form:"description"`
 
 	// To keep password string private.
-	Password string `json:"-,omitempty" gorm:"column:password" form:"password"`
+	Password string `json:"-" gorm:"column:password" form:"password"`
 }

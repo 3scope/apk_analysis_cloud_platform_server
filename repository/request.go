@@ -14,7 +14,7 @@ type Request struct {
 
 type UserEntity struct {
 	UserID uint `form:"userID"`
-	model.User
+	User   model.User
 }
 
 type CaseEntity struct {

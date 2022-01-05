@@ -67,8 +67,13 @@ func (repo *UserRepository) Add(request *Request) (*model.User, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	// Use scan to store the result.
-	if err := repo.DB.Create(request.Entity).Scan(&user).Error; err != nil {
+	if entity, ok := (request.Entity).(*UserEntity); !ok {
+		return nil, errors.New("invalid type entity")
+	} else {
+		user = (*entity).User
+	}
+
+	if err := repo.DB.Model(&user).Create(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

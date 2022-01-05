@@ -7,7 +7,6 @@ import (
 
 	"github.com/sanscope/apk_analysis_cloud_platform_server/enum"
 	_ "github.com/sanscope/apk_analysis_cloud_platform_server/modify_log"
-	"github.com/sanscope/apk_analysis_cloud_platform_server/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sanscope/apk_analysis_cloud_platform_server/service"
@@ -29,8 +28,7 @@ type CaseHandlerInterface interface {
 }
 
 func (h *CaseHandler) GetTotalHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -53,8 +51,7 @@ func (h *CaseHandler) GetTotalHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) ListHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -77,8 +74,7 @@ func (h *CaseHandler) ListHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) AddHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -100,8 +96,7 @@ func (h *CaseHandler) AddHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) GetOneHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -123,8 +118,7 @@ func (h *CaseHandler) GetOneHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) IsExistHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -147,8 +141,7 @@ func (h *CaseHandler) IsExistHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) DeleteHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return
@@ -171,8 +164,7 @@ func (h *CaseHandler) DeleteHandler(c *gin.Context) {
 }
 
 func (h *CaseHandler) UpdateHandler(c *gin.Context) {
-	var entity repository.CaseEntity
-	request := RequestFactory(c, entity)
+	request := RequestFactory(c, enum.CaseEntity)
 	if request == nil {
 		log.Println(errors.New("request is empty"))
 		return

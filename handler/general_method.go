@@ -10,7 +10,7 @@ import (
 )
 
 // The entity type will change dynamically.
-func RequestFactory(c *gin.Context, entity interface{}) *repository.Request {
+func RequestFactory(c *gin.Context, entityType enum.EntityType) *repository.Request {
 	var request repository.Request
 
 	// If use json to pass data, this method will be changed to "c.ShouldBindBodyWith".
@@ -22,30 +22,55 @@ func RequestFactory(c *gin.Context, entity interface{}) *repository.Request {
 		return nil
 	}
 
-	if err := c.ShouldBind(&entity); err != nil {
+	if entity, err := EntityFactory(c, entityType); err != nil {
 		res := ResponseFactory(enum.FailedOpration, nil)
 		c.JSON(http.StatusBadRequest, res)
 
 		log.Println(err)
 		return nil
+	} else {
+		// Assign value if binding is successful.
+		// The entity variable is struct, but the "Entity" attribute is pointer.
+		request.Entity = entity
 	}
 
-	// Assign value if binding is successful.
-	// The entity variable is struct, but the "Entity" attribute is pointer.
-	request.Entity = &entity
 	return &request
 }
 
-// Only bind entiy.
-func EntityFactory(c *gin.Context, entity interface{}) interface{} {
-	// Client request error.
-	if err := c.ShouldBind(&entity); err != nil {
-		res := ResponseFactory(enum.FailedOpration, nil)
-		c.JSON(http.StatusBadRequest, res)
-
-		log.Println(err)
-		return nil
+func EntityFactory(c *gin.Context, entityType enum.EntityType) (interface{}, error) {
+	var entity interface{}
+	var err error
+	switch entityType {
+	case enum.UserEntity:
+		ins := repository.UserEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
+	case enum.CaseEntity:
+		ins := repository.CaseEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
+	case enum.StaticAnalysisEntity:
+		ins := repository.StaticAnalysisEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
+	case enum.DynamicAnalysisEntity:
+		ins := repository.DynamicAnalysisEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
+	case enum.ReportEntity:
+		ins := repository.ReportEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
+	case enum.VideoEntity:
+		ins := repository.VideoEntity{}
+		err = c.ShouldBind(&ins)
+		// The entity is the pointer.
+		entity = &ins
 	}
-
-	return &entity
+	return entity, err
 }
