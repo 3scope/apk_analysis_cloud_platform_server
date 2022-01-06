@@ -25,7 +25,7 @@ func (builder *InitializationList) InitializeHandler() *InitializationList {
 			},
 		},
 	}
-	builder.StaticAnalysisHander = &handler.StaticAnalysisHandler{
+	builder.StaticAnalysisHandler = &handler.StaticAnalysisHandler{
 		Srv: &service.StaticAnalysisService{
 			Repository: &repository.StaticAnalysisRepository{
 				DB: builder.DB,

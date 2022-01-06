@@ -119,7 +119,7 @@ func (repo *DynamicAnalysisRepository) IsExist(request *Request) (int64, error) 
 	}
 
 	// The "Entity" is pointer.
-	if err := repo.DB.Debug().Table("dynamic_analysis").Where(dynamicAnalysis, "dynamicAnalysisname").Count(&count).Error; err != nil {
+	if err := repo.DB.Debug().Table("dynamic_analysis").Where(dynamicAnalysis, "analysis_data").Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

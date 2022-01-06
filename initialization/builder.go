@@ -9,7 +9,7 @@ type InitializationList struct {
 	DB                     *gorm.DB
 	UserHandler            *handler.UserHandler
 	CaseHandler            *handler.CaseHandler
-	StaticAnalysisHander   *handler.StaticAnalysisHandler
+	StaticAnalysisHandler  *handler.StaticAnalysisHandler
 	DynamicAnalysisHandler *handler.DynamicAnalysisHandler
 	VideoHandler           *handler.VideoHandler
 	ReportHandler          *handler.ReportHandler

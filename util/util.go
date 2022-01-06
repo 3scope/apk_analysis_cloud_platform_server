@@ -23,12 +23,8 @@ func GetTimestampNow() string {
 	return now
 }
 
-func FormatTimestamp(timeString string) string {
-	result, err := time.ParseInLocation(TimeFormat, timeString, CST)
-	if err != nil {
-		log.Panicln(err)
-	}
-	return result.In(CST).Format(TimeFormat)
+func FormatTimeString(timeString string) (time.Time, error) {
+	return time.ParseInLocation(TimeFormat, timeString, CST)
 }
 
 // To Check the pagination arguments.

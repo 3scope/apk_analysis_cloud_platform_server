@@ -119,7 +119,7 @@ func (repo *ReportRepository) IsExist(request *Request) (int64, error) {
 	}
 
 	// The "Entity" is pointer.
-	if err := repo.DB.Debug().Table("reports").Where(report, "reportname").Count(&count).Error; err != nil {
+	if err := repo.DB.Debug().Table("reports").Where(report, "report_name").Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

@@ -119,7 +119,7 @@ func (repo *StaticAnalysisRepository) IsExist(request *Request) (int64, error) {
 	}
 
 	// The "Entity" is pointer.
-	if err := repo.DB.Debug().Table("static_analysis").Where(staticAnalysis, "staticAnalysisname").Count(&count).Error; err != nil {
+	if err := repo.DB.Debug().Table("static_analysis").Where(staticAnalysis, "app_name").Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

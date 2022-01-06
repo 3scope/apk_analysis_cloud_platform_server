@@ -119,7 +119,7 @@ func (repo *VideoRepository) IsExist(request *Request) (int64, error) {
 	}
 
 	// The "Entity" is pointer.
-	if err := repo.DB.Debug().Table("videos").Where(video, "videoname").Count(&count).Error; err != nil {
+	if err := repo.DB.Debug().Table("videos").Where(video, "video_name").Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil
