@@ -58,10 +58,11 @@ func (srv *UserService) Delete(request *repository.Request) (bool, error) {
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if user, ok := request.Entity.(model.User); !ok {
+	// Determine whether it is a pointer.
+	if user, ok := request.Entity.(*(repository.UserEntity)); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if user.ID == 0 {
-		return false, errors.New("request parameter error, the primary key is null")
+	} else if user == nil {
+		return false, errors.New("request parameter error, the entity is null")
 	}
 	return srv.Repository.Delete(request)
 }

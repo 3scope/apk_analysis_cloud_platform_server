@@ -27,12 +27,16 @@ func (repo *UserRepository) GetTotal(request *Request) (int64, error) {
 	// The default database.
 	var total int64
 	db := repo.DB
-	var users []model.User
 	// The Where object is a struct pointer.
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	// Get the entity pointer.
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return 0, errors.New("invalid type of entity")
 	}
-	if err := db.Find(&users).Count(&total).Error; err != nil {
+	// Query conditions can be added here.
+	db = db.Debug().Table("users").Where(user)
+
+	if err := db.Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
@@ -48,18 +52,22 @@ func (repo *UserRepository) List(request *Request) ([]model.User, error) {
 	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
-	}
 
-	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+	// Get the entity pointer.
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	// The entity is pointer.
+	db = db.Debug().Table("users").Where(user)
+
+	if err := db.Order("id ASC").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
 func (repo *UserRepository) Add(request *Request) (*model.User, error) {
-	var user model.User
 	// To judge whether the request entity is existed.
 	if count, err := repo.IsExist(request); err != nil {
 		return nil, err
@@ -67,63 +75,109 @@ func (repo *UserRepository) Add(request *Request) (*model.User, error) {
 		return nil, errors.New("user already exists")
 	}
 
-	if entity, ok := (request.Entity).(*UserEntity); !ok {
-		return nil, errors.New("invalid type entity")
-	} else {
-		user = (*entity).User
+	// Get the entity pointer.
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return nil, errors.New("invalid type of entity")
 	}
 
-	if err := repo.DB.Model(&user).Create(&user).Error; err != nil {
+	// The "user" variable is pointer.
+	if err := repo.DB.Debug().Table("users").Create(user).Error; err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (repo *UserRepository) GetOne(request *Request) (*model.User, error) {
 	// Get only one instance.
-	var user model.User
 	db := repo.DB
+	var count int64
 
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return nil, errors.New("invalid type of entity")
 	}
+	db = db.Debug().Table("users").Where(user)
 
-	if err := db.Limit(1).Find(&user).Error; err != nil {
+	if err := db.Limit(1).Find(user).Count(&count).Error; err != nil {
 		return nil, err
 	}
-	return &user, nil
+	// To judge whether there are result.
+	if count == 0 {
+		return nil, nil
+	}
+	return user, nil
 }
 
 func (repo *UserRepository) IsExist(request *Request) (int64, error) {
 	var count int64
+
+	// Get the entity pointer.
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return 0, errors.New("invalid type of entity")
+	}
+
 	// The "Entity" is pointer.
-	if err := repo.DB.Where(request.Entity).Find(&model.User{}).Count(&count).Error; err != nil {
-		return count, err
+	if err := repo.DB.Debug().Table("users").Where(user, "username").Count(&count).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }
 
 func (repo *UserRepository) Delete(request *Request) (bool, error) {
-	if err := repo.DB.Model(&model.User{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return false, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*UserEntity)
+	user.ID = entity.UserID
+
+	if err := repo.DB.Debug().Table("users").Where(user).Delete(user).Error; err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 func (repo *UserRepository) Update(request *Request) (*model.User, error) {
-	var user model.User
+	user := GetUserInstance(request.Entity)
+	if user == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*UserEntity)
+	user.ID = entity.UserID
+
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("user already exists")
+	}
+
 	// The verification task is handed over to the front end.
+	// Cannot change password use this function.
 	// Use scan to store the result.
-	if err := repo.DB.Model(&model.User{}).Where(request.Entity).Updates(model.User{
+	if err := repo.DB.Debug().Table("users").Where("id = ?", user.ID).Updates(model.User{
 		Username:    user.Username,
 		RealName:    user.RealName,
 		Email:       user.Email,
 		Role:        user.Role,
 		Description: user.Description,
-		Password:    user.Password,
 	}).Scan(&user).Error; err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
+}
+
+// TODO: Change password function.
+
+// To get a entity instance.
+func GetUserInstance(entity interface{}) *model.User {
+	var user model.User
+	if entity, ok := entity.(*UserEntity); !ok {
+		return nil
+	} else {
+		user = (*entity).User
+	}
+	return &user
 }

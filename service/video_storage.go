@@ -58,10 +58,11 @@ func (srv *VideoService) Delete(request *repository.Request) (bool, error) {
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if video, ok := request.Entity.(model.Video); !ok {
+	// Determine whether it is a pointer.
+	if video, ok := request.Entity.(*(repository.VideoEntity)); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if video.ID == 0 {
-		return false, errors.New("request parameter error, the primary key is null")
+	} else if video == nil {
+		return false, errors.New("request parameter error, the entity is null")
 	}
 	return srv.Repository.Delete(request)
 }

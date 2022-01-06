@@ -58,10 +58,11 @@ func (srv *ReportService) Delete(request *repository.Request) (bool, error) {
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if report, ok := request.Entity.(model.Report); !ok {
+	// Determine whether it is a pointer.
+	if report, ok := request.Entity.(*(repository.ReportEntity)); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if report.ID == 0 {
-		return false, errors.New("request parameter error, the primary key is null")
+	} else if report == nil {
+		return false, errors.New("request parameter error, the entity is null")
 	}
 	return srv.Repository.Delete(request)
 }

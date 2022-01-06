@@ -27,12 +27,16 @@ func (repo *CaseRepository) GetTotal(request *Request) (int64, error) {
 	// The default database.
 	var total int64
 	db := repo.DB
-	var caseInstances []model.Case
 	// The Where object is a struct pointer.
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	// Get the entity pointer.
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return 0, errors.New("invalid type of entity")
 	}
-	if err := db.Find(&caseInstances).Count(&total).Error; err != nil {
+	// Query conditions can be added here.
+	db = db.Debug().Table("caseInstances").Where(caseInstance)
+
+	if err := db.Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
@@ -48,18 +52,22 @@ func (repo *CaseRepository) List(request *Request) ([]model.Case, error) {
 	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
-	}
 
-	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&caseInstances).Error; err != nil {
+	// Get the entity pointer.
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	// The entity is pointer.
+	db = db.Debug().Table("caseInstances").Where(caseInstance)
+
+	if err := db.Order("id ASC").Limit(limit).Offset(offset).Find(&caseInstances).Error; err != nil {
 		return nil, err
 	}
 	return caseInstances, nil
 }
 
 func (repo *CaseRepository) Add(request *Request) (*model.Case, error) {
-	var caseInstance model.Case
 	// To judge whether the request entity is existed.
 	if count, err := repo.IsExist(request); err != nil {
 		return nil, err
@@ -67,47 +75,86 @@ func (repo *CaseRepository) Add(request *Request) (*model.Case, error) {
 		return nil, errors.New("caseInstance already exists")
 	}
 
-	// Use scan to store the result.
-	if err := repo.DB.Create(request.Entity).Scan(&caseInstance).Error; err != nil {
+	// Get the entity pointer.
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+
+	// The "caseInstance" variable is pointer.
+	if err := repo.DB.Debug().Table("caseInstances").Create(caseInstance).Error; err != nil {
 		return nil, err
 	}
-	return &caseInstance, nil
+	return caseInstance, nil
 }
 
 func (repo *CaseRepository) GetOne(request *Request) (*model.Case, error) {
 	// Get only one instance.
-	var caseInstance model.Case
 	db := repo.DB
+	var count int64
 
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return nil, errors.New("invalid type of entity")
 	}
+	db = db.Debug().Table("caseInstances").Where(caseInstance)
 
-	if err := db.Limit(1).Find(&caseInstance).Error; err != nil {
+	if err := db.Limit(1).Find(caseInstance).Count(&count).Error; err != nil {
 		return nil, err
 	}
-	return &caseInstance, nil
+	// To judge whether there are result.
+	if count == 0 {
+		return nil, nil
+	}
+	return caseInstance, nil
 }
 
 func (repo *CaseRepository) IsExist(request *Request) (int64, error) {
 	var count int64
+
+	// Get the entity pointer.
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return 0, errors.New("invalid type of entity")
+	}
+
 	// The "Entity" is pointer.
-	if err := repo.DB.Where(request.Entity).Find(&model.Case{}).Count(&count).Error; err != nil {
-		return count, err
+	if err := repo.DB.Debug().Table("caseInstances").Where(caseInstance, "caseInstancename").Count(&count).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }
 
 func (repo *CaseRepository) Delete(request *Request) (bool, error) {
-	if err := repo.DB.Model(&model.Case{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return false, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*CaseEntity)
+	caseInstance.ID = entity.CaseID
+
+	if err := repo.DB.Debug().Table("caseInstances").Where(caseInstance).Delete(caseInstance).Error; err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 func (repo *CaseRepository) Update(request *Request) (*model.Case, error) {
-	var caseInstance model.Case
+	caseInstance := GetCaseInstance(request.Entity)
+	if caseInstance == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*CaseEntity)
+	caseInstance.ID = entity.CaseID
+
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("caseInstance already exists")
+	}
+
 	// The verification task is handed over to the front end.
+	// Cannot change password use this function.
 	// Use scan to store the result.
 	if err := repo.DB.Model(&model.Case{}).Where(request.Entity).Updates(model.Case{
 		CaseName:          caseInstance.CaseName,
@@ -121,5 +168,16 @@ func (repo *CaseRepository) Update(request *Request) (*model.Case, error) {
 		return nil, err
 	}
 
-	return &caseInstance, nil
+	return caseInstance, nil
+}
+
+// To get a entity instance.
+func GetCaseInstance(entity interface{}) *model.Case {
+	var caseInstance model.Case
+	if entity, ok := entity.(*CaseEntity); !ok {
+		return nil
+	} else {
+		caseInstance = (*entity).Case
+	}
+	return &caseInstance
 }

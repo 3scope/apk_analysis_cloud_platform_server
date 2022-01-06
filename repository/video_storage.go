@@ -27,12 +27,16 @@ func (repo *VideoRepository) GetTotal(request *Request) (int64, error) {
 	// The default database.
 	var total int64
 	db := repo.DB
-	var videos []model.Video
 	// The Where object is a struct pointer.
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	// Get the entity pointer.
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return 0, errors.New("invalid type of entity")
 	}
-	if err := db.Find(&videos).Count(&total).Error; err != nil {
+	// Query conditions can be added here.
+	db = db.Debug().Table("videos").Where(video)
+
+	if err := db.Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
@@ -48,18 +52,22 @@ func (repo *VideoRepository) List(request *Request) ([]model.Video, error) {
 	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
-	}
 
-	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&videos).Error; err != nil {
+	// Get the entity pointer.
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	// The entity is pointer.
+	db = db.Debug().Table("videos").Where(video)
+
+	if err := db.Order("id ASC").Limit(limit).Offset(offset).Find(&videos).Error; err != nil {
 		return nil, err
 	}
 	return videos, nil
 }
 
 func (repo *VideoRepository) Add(request *Request) (*model.Video, error) {
-	var video model.Video
 	// To judge whether the request entity is existed.
 	if count, err := repo.IsExist(request); err != nil {
 		return nil, err
@@ -67,54 +75,104 @@ func (repo *VideoRepository) Add(request *Request) (*model.Video, error) {
 		return nil, errors.New("video already exists")
 	}
 
-	// Use scan to store the result.
-	if err := repo.DB.Create(request.Entity).Scan(&video).Error; err != nil {
+	// Get the entity pointer.
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+
+	// The "video" variable is pointer.
+	if err := repo.DB.Debug().Table("videos").Create(video).Error; err != nil {
 		return nil, err
 	}
-	return &video, nil
+	return video, nil
 }
 
 func (repo *VideoRepository) GetOne(request *Request) (*model.Video, error) {
 	// Get only one instance.
-	var video model.Video
 	db := repo.DB
+	var count int64
 
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return nil, errors.New("invalid type of entity")
 	}
+	db = db.Debug().Table("videos").Where(video)
 
-	if err := db.Limit(1).Find(&video).Error; err != nil {
+	if err := db.Limit(1).Find(video).Count(&count).Error; err != nil {
 		return nil, err
 	}
-	return &video, nil
+	// To judge whether there are result.
+	if count == 0 {
+		return nil, nil
+	}
+	return video, nil
 }
 
 func (repo *VideoRepository) IsExist(request *Request) (int64, error) {
 	var count int64
+
+	// Get the entity pointer.
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return 0, errors.New("invalid type of entity")
+	}
+
 	// The "Entity" is pointer.
-	if err := repo.DB.Where(request.Entity).Find(&model.Video{}).Count(&count).Error; err != nil {
-		return count, err
+	if err := repo.DB.Debug().Table("videos").Where(video, "videoname").Count(&count).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }
 
 func (repo *VideoRepository) Delete(request *Request) (bool, error) {
-	if err := repo.DB.Model(&model.Video{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return false, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*VideoEntity)
+	video.ID = entity.VideoID
+
+	if err := repo.DB.Debug().Table("videos").Where(video).Delete(video).Error; err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 func (repo *VideoRepository) Update(request *Request) (*model.Video, error) {
-	var video model.Video
+	video := GetVideoInstance(request.Entity)
+	if video == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*VideoEntity)
+	video.ID = entity.VideoID
+
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("video already exists")
+	}
+
 	// The verification task is handed over to the front end.
+	// Cannot change password use this function.
 	// Use scan to store the result.
-	if err := repo.DB.Model(&model.Video{}).Where(request.Entity).Updates(model.Video{
+	if err := repo.DB.Debug().Table("videos").Where("id = ?", video.ID).Updates(model.Video{
 		VideoName: video.VideoName,
 		VideoTime: video.VideoTime,
 	}).Scan(&video).Error; err != nil {
 		return nil, err
 	}
 
-	return &video, nil
+	return video, nil
+}
+
+// To get a entity instance.
+func GetVideoInstance(entity interface{}) *model.Video {
+	var video model.Video
+	if entity, ok := entity.(*VideoEntity); !ok {
+		return nil
+	} else {
+		video = (*entity).Video
+	}
+	return &video
 }

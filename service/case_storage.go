@@ -58,10 +58,11 @@ func (srv *CaseService) Delete(request *repository.Request) (bool, error) {
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if caseInstance, ok := request.Entity.(model.Case); !ok {
+	// Determine whether it is a pointer.
+	if caseInstance, ok := request.Entity.(*(repository.CaseEntity)); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if caseInstance.ID == 0 {
-		return false, errors.New("request parameter error, the primary key is null")
+	} else if caseInstance == nil {
+		return false, errors.New("request parameter error, the entity is null")
 	}
 	return srv.Repository.Delete(request)
 }

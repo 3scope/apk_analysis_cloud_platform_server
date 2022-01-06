@@ -27,12 +27,16 @@ func (repo *ReportRepository) GetTotal(request *Request) (int64, error) {
 	// The default database.
 	var total int64
 	db := repo.DB
-	var reports []model.Report
 	// The Where object is a struct pointer.
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	// Get the entity pointer.
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return 0, errors.New("invalid type of entity")
 	}
-	if err := db.Find(&reports).Count(&total).Error; err != nil {
+	// Query conditions can be added here.
+	db = db.Debug().Table("reports").Where(report)
+
+	if err := db.Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
@@ -48,18 +52,22 @@ func (repo *ReportRepository) List(request *Request) ([]model.Report, error) {
 	}
 	// Get the correct number of data.
 	limit, offset := util.PaginationCheck(request.PageNumber, request.PageSize, int(total), 100)
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
-	}
 
-	if err := db.Order("id asc").Limit(limit).Offset(offset).Find(&reports).Error; err != nil {
+	// Get the entity pointer.
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	// The entity is pointer.
+	db = db.Debug().Table("reports").Where(report)
+
+	if err := db.Order("id ASC").Limit(limit).Offset(offset).Find(&reports).Error; err != nil {
 		return nil, err
 	}
 	return reports, nil
 }
 
 func (repo *ReportRepository) Add(request *Request) (*model.Report, error) {
-	var report model.Report
 	// To judge whether the request entity is existed.
 	if count, err := repo.IsExist(request); err != nil {
 		return nil, err
@@ -67,54 +75,104 @@ func (repo *ReportRepository) Add(request *Request) (*model.Report, error) {
 		return nil, errors.New("report already exists")
 	}
 
-	// Use scan to store the result.
-	if err := repo.DB.Create(request.Entity).Scan(&report).Error; err != nil {
+	// Get the entity pointer.
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+
+	// The "report" variable is pointer.
+	if err := repo.DB.Debug().Table("reports").Create(report).Error; err != nil {
 		return nil, err
 	}
-	return &report, nil
+	return report, nil
 }
 
 func (repo *ReportRepository) GetOne(request *Request) (*model.Report, error) {
 	// Get only one instance.
-	var report model.Report
 	db := repo.DB
+	var count int64
 
-	if request.Entity != nil {
-		db = db.Where(request.Entity)
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return nil, errors.New("invalid type of entity")
 	}
+	db = db.Debug().Table("reports").Where(report)
 
-	if err := db.Limit(1).Find(&report).Error; err != nil {
+	if err := db.Limit(1).Find(report).Count(&count).Error; err != nil {
 		return nil, err
 	}
-	return &report, nil
+	// To judge whether there are result.
+	if count == 0 {
+		return nil, nil
+	}
+	return report, nil
 }
 
 func (repo *ReportRepository) IsExist(request *Request) (int64, error) {
 	var count int64
+
+	// Get the entity pointer.
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return 0, errors.New("invalid type of entity")
+	}
+
 	// The "Entity" is pointer.
-	if err := repo.DB.Where(request.Entity).Find(&model.Report{}).Count(&count).Error; err != nil {
-		return count, err
+	if err := repo.DB.Debug().Table("reports").Where(report, "reportname").Count(&count).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }
 
 func (repo *ReportRepository) Delete(request *Request) (bool, error) {
-	if err := repo.DB.Model(&model.Report{}).Where(request.Entity).Delete(request.Entity).Error; err != nil {
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return false, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*ReportEntity)
+	report.ID = entity.ReportID
+
+	if err := repo.DB.Debug().Table("reports").Where(report).Delete(report).Error; err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 func (repo *ReportRepository) Update(request *Request) (*model.Report, error) {
-	var report model.Report
+	report := GetReportInstance(request.Entity)
+	if report == nil {
+		return nil, errors.New("invalid type of entity")
+	}
+	entity, _ := request.Entity.(*ReportEntity)
+	report.ID = entity.ReportID
+
+	if count, err := repo.IsExist(request); err != nil {
+		return nil, err
+	} else if count != 0 {
+		return nil, errors.New("report already exists")
+	}
+
 	// The verification task is handed over to the front end.
+	// Cannot change password use this function.
 	// Use scan to store the result.
-	if err := repo.DB.Model(&model.Report{}).Where(request.Entity).Updates(model.Report{
+	if err := repo.DB.Debug().Table("reports").Where("id = ?", report.ID).Updates(model.Report{
 		ReportName: report.ReportName,
 		CaseID:     report.CaseID,
 	}).Scan(&report).Error; err != nil {
 		return nil, err
 	}
 
-	return &report, nil
+	return report, nil
+}
+
+// To get a entity instance.
+func GetReportInstance(entity interface{}) *model.Report {
+	var report model.Report
+	if entity, ok := entity.(*ReportEntity); !ok {
+		return nil
+	} else {
+		report = (*entity).Report
+	}
+	return &report
 }

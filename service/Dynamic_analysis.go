@@ -58,10 +58,11 @@ func (srv *DynamicAnalysisService) Delete(request *repository.Request) (bool, er
 	if request.Entity == nil {
 		return false, errors.New("request parameter error, the 'Entity' attribute is null")
 	}
-	if dynamicAnalysis, ok := request.Entity.(model.DynamicAnalysis); !ok {
+	// Determine whether it is a pointer.
+	if dynamicAnalysis, ok := request.Entity.(*(repository.DynamicAnalysisEntity)); !ok {
 		return false, errors.New("request parameter error, the 'Entity' attribute type error")
-	} else if dynamicAnalysis.ID == 0 {
-		return false, errors.New("request parameter error, the primary key is null")
+	} else if dynamicAnalysis == nil {
+		return false, errors.New("request parameter error, the entity is null")
 	}
 	return srv.Repository.Delete(request)
 }
